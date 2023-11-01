@@ -5,11 +5,11 @@
 </template>
 <script>
   import Ordenes from "../components/ordenes/ordenes.vue"
-  export default {
+  export default { 
+    name: 'IndexPage',
     components: { 
       Ordenes,
-    }, 
-    name: 'IndexPage',
+    },
     data () {
       return {
       }

@@ -1,7 +1,9 @@
 <template>
   <v-app style="background-color: #f5f5f5">
     <Navbar ref="navbar" />
+    
     <v-main>
+      <br>
       <v-container>
         <Nuxt />
       </v-container>
@@ -20,32 +22,7 @@
 export default {
   name: 'DefaultLayout',
   data () {
-    return {
-      // clipped: false,
-      // drawer: false,
-      // fixed: false,
-      // items: [
-      //   {
-      //     icon: 'mdi-apps',
-      //     title: 'Welcome',
-      //     to: '/'
-      //   },
-      //   {
-      //     icon: 'mdi-chart-bubble',
-      //     title: 'Inspire',
-      //     to: '/inspire'
-      //   },
-      //   {
-      //     icon: 'mdi-chart-bubble',
-      //     title: 'dsfgsdgdf',
-      //     to: '/inspire'
-      //   }
-      // ],
-      // miniVariant: false,
-      // right: true,
-      // rightDrawer: false,
-      // title: 'Vendedores'
-    }
+    return {fixed: false}
   },
   computed : {
     user() {
@@ -53,9 +30,10 @@ export default {
     },
   },
   mounted() {
-    console.log(this.user)
-    if(this.user === null) {
+    if (!localStorage.getItem("token")) {
       this.$router.push('/login')
+    } else {
+      this.$axios.setToken(localStorage.getItem("token"), 'Token');
     }
   },
 

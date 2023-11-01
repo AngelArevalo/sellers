@@ -40,16 +40,19 @@
     </v-navigation-drawer>
   </div>
 </template>
+
 <script>
-export default {
-  data() {
-    return {
-      items: [
-        { title: "Dashboard", icon: "mdi-view-dashboard" },
-        { title: "Photos", icon: "mdi-image" },
-        { title: "About", icon: "mdi-help-box" },
-      ],
-    };
-  },
-};
+  export default {
+    name: "DrawerComponent",
+    data() {
+      return {
+        selectedItem: {},
+        items: [
+          { title: "Dashboard", icon: "mdi-view-dashboard" },
+          { title: "Photos", icon: "mdi-image" },
+          { title: "About", icon: "mdi-help-box" },
+        ],
+      };
+    },
+  };
 </script>

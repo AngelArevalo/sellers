@@ -7,9 +7,6 @@ export const mutations = {
   }
 }
 export const actions = {
-  storeUser({commit}, user) {
-    commit('STORE_USER', user)
-  }
 }
 export const getters = {
   getUser(state) {

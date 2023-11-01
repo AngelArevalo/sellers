@@ -5,8 +5,17 @@
   >
 </template>
 
+<script>
+  export default {
+    name: "LogoMedical",
+    data() {
+      return {};
+    },
+  };
+</script>
+
 <style>
-.vuetify-logo {
-  width: 90%;
-}
+  .vuetify-logo {
+    width: 90%;
+  }
 </style>
