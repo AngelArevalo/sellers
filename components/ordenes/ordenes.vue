@@ -46,10 +46,10 @@
         this.windowWidth = window.innerWidth
       },
       showDialogEdit(id) {
-        this.$refs.dialog.editItem(id);
+        this.$refs.dialog.editarOrden(id);
       },
       showDialogView(id) {
-        this.$refs.dialog.viewItem(id);
+        this.$refs.dialog.verOrden(id);
       },
       loadTable() {
         this.$refs.table.listOrders()

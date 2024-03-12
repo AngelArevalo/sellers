@@ -1,6 +1,8 @@
 <template>
   <div>
     <v-data-table
+      :sort-by="['orden']"
+      sort-desc
       :headers="headers"
       :items="ordenes"
 
@@ -18,7 +20,7 @@
     >
       <template #[`item.orden`]="{ item }">
         <td v-if="windowWidth < 770">
-          <strong>#{{item.orden}}</strong> | <span>{{item.cliente}}</span>
+          <strong>#{{item.orden}}</strong> | <span>{{item.data_cliente}} | {{item.fecha}}</span>
         </td>
         <td v-else><strong>{{item.orden}}</strong></td>
       </template>
@@ -33,11 +35,14 @@
           <strong v-if="item.estado == 'P'">
             Pendiente
           </strong>
-          <strong v-if="item.estado == 'A'">
+          <strong v-else-if="item.estado == 'A' || item.estado == 'U'">
             Procesada
           </strong>
-          <strong v-if="item.estado == 'C'">
+          <strong v-else-if="item.estado == 'C'">
             Cancelada
+          </strong>
+          <strong v-else>
+            Desconocido
           </strong>
         </v-chip>
       </template>
@@ -63,29 +68,12 @@
           v-if="item.estado == 'P'"
           small
           color="red"
+          @click.stop="detenerClick"
           @click="borrar(item.orden)"
         >
           mdi-cancel
         </v-icon>
       </template>
-      <!-- <template #[`header.orden`]>
-        <div class="cabecera">Correlativo</div>
-      </template>
-      <template #[`header.cliente`]>
-        <div class="cabecera">Cliente</div>
-      </template>
-      <template #[`header.nota`]>
-        <div class="cabecera">Nota</div>
-      </template>
-      <template #[`header.descripcion`]>
-        <div class="cabecera">Descripcion</div>
-      </template>
-      <template #[`header.fecha`]>
-        <div class="cabecera">Fecha</div>
-      </template>
-      <template #[`header.estado`]>
-        <div class="cabecera">Estado</div>
-      </template> -->
       <template #[`expanded-item`]="{ item }">
         <td v-if="windowWidth > '600'" colspan="12">
           <br>
@@ -111,7 +99,7 @@
                   <strong v-if="item.estado == 'P'">
                     Pendiente
                   </strong>
-                  <strong v-if="item.estado == 'A'">
+                  <strong v-if="item.estado == 'A' || item.estado == 'U'">
                     Procesada
                   </strong>
                   <strong v-if="item.estado == 'C'">
@@ -122,16 +110,6 @@
             </v-col>
           </v-row>
           <br>
-          <v-divider> asdfasdf </v-divider>
-          <!-- <br>
-          <v-row>
-            <v-col cols="12" style="margin-left: 20px">
-              <span v-if="item.nota">(Descripcion)</span>
-              <span v-else>{{item.descripcion}}</span>
-            </v-col>
-          </v-row>
-          <br>
-          <v-divider></v-divider> -->
           <br>
           <v-row style="margin-left: 5%; width: 90%">
             <v-col cols="6">
@@ -187,16 +165,6 @@
             </v-col>
           </v-row>
           <br>
-          <v-divider> asdfasdf </v-divider>
-          <!-- <br>
-          <v-row>
-            <v-col cols="12" style="margin-left: 20px">
-              <span v-if="item.nota">(Descripcion)</span>
-              <span v-else>{{item.descripcion}}</span>
-            </v-col>
-          </v-row>
-          <br>
-          <v-divider></v-divider> -->
           <br>
           <v-row style="margin-left: 5%; width: 90%">
             <v-col cols="6">
@@ -230,12 +198,20 @@
         max-width="350"
       >
         <v-card>
+          <v-card-title>Cancelar orden</v-card-title>
+          <v-card-text>
+            ¿Estás seguro de que deseas cancelar esta Orden?
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn @click="dialogCancel = false">No</v-btn>
+            <v-btn color="error" @click="confirm(idCancel)">Cancelar</v-btn>
+          </v-card-actions>
+        </v-card>
+        <!-- <v-card>
           <v-card-title class="text-h5 warning">
             ¿Desea cancelar la orden?
           </v-card-title>
-          <v-card-text>
-            Esta acción cancelara la orden
-          </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
@@ -253,7 +229,7 @@
               SI
             </v-btn>
           </v-card-actions>
-        </v-card>
+        </v-card> -->
       </v-dialog>
     </div>
   </div>  
@@ -303,18 +279,9 @@
       changeSize () {
         if (this.windowWidth < '770') { this.setTable(true); this.changeExpand() }
         else { this.setTable(); this.changeExpand(true)}
-        if (this.windowWidth < '600') { this.small = true; this.changeDescription()}
-        else if(this.windowWidth < '960' && this.windowWidth > '600') {this.fullscreen = false; this.small = true; this.changeDescription()}
-        else if(this.windowWidth < '1264' && this.windowWidth > '960') {this.changeDescription()}
-        else {this.small = false; this.changeDescription(true)}
-      },
-      changeDescription(add = false) {
-        const indice = this.headers.findIndex(obj => obj.text === "Descripcion")
-        if (add && indice === -1) {
-          this.headers.splice(3, 0, { text: 'Descripcion', value: 'descripcion' })
-        } else if (!add && indice > 0) {
-          this.headers.splice(indice, 1)
-        }
+        if (this.windowWidth < '600') { this.small = true}
+        else if(this.windowWidth < '960' && this.windowWidth > '600') {this.fullscreen = false; this.small = true}
+        else if(this.windowWidth > '1264') {this.small = false}
       },
       changeExpand(remove = false) {
         if (remove) {
@@ -337,22 +304,28 @@
               text: 'Correlativo',
               value: 'orden',
               align: 'start',
+              width: '120px'
             },
-            { text: 'Cliente', value: 'cliente' },
+            { text: 'Cliente', value: 'data_cliente' },
             { text: 'Nota', value: 'nota' },
-            { text: 'Descripcion', value: 'descripcion' },
             {
               text: 'Fecha',
               value: 'fecha_orden',
               align: 'end',
               sortable: false,
+              width: '120px'
             },
-            { text: 'Estado', value: 'estado' },
+            {
+              text: 'Estado',
+              value: 'estado',
+              width: '60px'
+            },
             {
               text: 'Acciones',
               value: 'acciones',
               align: 'center',
               sortable: false,
+              width: '60px'
             },
           ];
         }
@@ -364,8 +337,9 @@
             let fecha = item.fecha_orden.substr(0,10)
             fecha = moment(fecha, 'YYYY-MM-DD').format('DD-MM-YYYY')
             this.ordenes.push({
+              data_cliente: item.cliente.codigo+" - "+item.cliente.nombre,
               orden: item.id,
-              cliente: item.nombre_cliente,
+              cliente: item.cliente.id,
               vendedor: item.vendedor,
               estado: item.estado,
               nota: item.nota,
@@ -377,8 +351,9 @@
       },
       getColor (estado) {
         if (estado === 'P') return 'orange'
+        else if (estado === 'A' || estado === 'U') return 'green'
         else if (estado === 'C') return 'red'
-        else return 'green'
+        else return 'purple'
       },
       edit(id) {
         this.$emit("edit", id);
@@ -392,12 +367,16 @@
       },
       confirm(id) {
         this.$axios.$post('cancel-orden/', { orden:id }).then(res => {
-          this.$toast.success('Orden cancelada' + res)
+          this.$toast.success(res)
           this.dialogCancel = false
           this.listOrders()
         }).catch(err => {
-          this.$toast.error('No se pudo cancelar la orden: ' + err)
+          this.$toast.error(err)
         })
+      },
+
+      detenerClick(event) {
+        event.stopPropagation();
       }
     },
   }
